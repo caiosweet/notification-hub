@@ -1,0 +1,826 @@
+### INFO
+  #   @author         :   Caio - www.hassiohelp.eu
+  #   @date           :   12/04/2019
+  #   @package        :   centro_notifiche v. 0.9
+  #   @description    :   Notification center (HUB) for TSS - Nofiy and Web-UI
+  ############################################################################
+  #weblink:
+  #  entities:
+  #    - name: Lentron [Janet (The Good Place)]
+  #      url: https://community.home-assistant.io/t/janet-the-good-place/38904
+  #    - name: CCOSTAN [speech_engine]
+  #      url: https://github.com/CCOSTAN/Home-AssistantConfig/blob/master/config/script/speech_engine.yaml
+  #    - name: mf-social [notifications]
+  #      url: https://github.com/mf-social/Home-Assistant/blob/master/homeassistant/packages/interactive/notifications.yaml
+  #    - name: 3vasi0n89 [notification_center]
+  #      url: https://github.com/3vasi0n89/home-assistant-config-files/blob/master/packages/notification_center.yaml
+  #    - name: happyleavesaoc [my-home-automation]
+  #      url: https://github.com/happyleavesaoc/my-home-automation/blob/master/homeassistant/packages/briefings.yaml
+
+#### Card Lovelace
+
+  ################### Centro Notifiche ######################
+  # type: entities
+  # title: Centro Notifiche
+  # show_header_toggle: false
+  # entities:
+  #   - type: section
+  #     label: Monitor
+  #   - entity: sensor.period_of_day_volume
+  #   - entity: binary_sensor.dnd
+  #   - type: call-service
+  #     icon: mdi:power
+  #     name: Ultimo Messaggio
+  #     action_name: Ascolta
+  #     service: input_boolean.turn_on
+  #     service_data:
+  #       entity_id: input_boolean.last_message
+  #   - type: section
+  #     label: Modalità
+  #   - entity: input_boolean.last_message
+  #   - entity: input_boolean.guest_mode
+  #   - entity: input_boolean.priority_message
+  #   - entity: input_boolean.speech_notifications
+  #   - entity: input_boolean.text_notifications
+  #   - entity: input_boolean.screen_notifications
+  #   - entity: input_boolean.random_fact
+  #   - type: section
+  #     label: Interfono
+  #   - entity: automation.send_intercom_message_hub
+  #     name: Off/On
+  #   - entity: input_number.intercom_message_volume
+  #   - entity: input_text.intercom_message_hub
+  #################### Impostazioni Assistente ###############
+  # type: entities
+  # title: Impostazioni Assistente
+  # show_header_toggle: false
+  # entities:
+  #   - type: section
+  #     label: ''
+  #   - entity: input_text.personal_assistant_name
+  #   - entity: input_select.default_notify
+  #   - type: section
+  #     label: Impostazione orario modo silenzioso
+  #   - entity: input_datetime.dnd_start
+  #   - entity: input_datetime.dnd_end
+  #   - type: section
+  #     label: 'Impostazione Volume di default durante il griorno'
+  #   - entity: group.period_of_day_volume
+  #   - entity: input_datetime.start_morning
+  #   - entity: input_datetime.start_afternoon
+  #   - entity: input_datetime.start_evening
+  #   - entity: input_datetime.start_night
+  #############################################################################
+
+#######################################-#######################################
+##                                 CUSTOMIZE                                   
+#######################################-#######################################
+homeassistant:
+  customize:
+    ################################################
+    ## NODE ANCHORS
+    ################################################
+
+    package.node_anchors:
+      customize: &customize
+        package: 'Centro Notifiche'
+        version: 'Main 0.9'
+        author: 'Caio - www.hassiohelp.eu'
+
+      expose: &expose
+        <<: *customize
+        haaska_hidden: false
+        homebridge_hidden: false
+
+    ################################################
+    ## Automation
+    ################################################
+    automation.send_intercom_message_hub:
+      <<: *customize
+      icon: mdi:bullhorn
+    automation.crea_gruppo_automazioni_notifiche:
+      <<: *customize
+    automation.modo_ospite:
+      <<: *customize
+    automation.notifica_ripeti_ultimo_messaggio:
+      <<: *customize
+    automation.avviso_errore_servizio_notifica:
+      <<: *customize
+    ################################################
+    ## Binary Sensor
+    ################################################
+    binary_sensor.dnd:
+      <<: *customize
+      friendly_name: 'Modo Silenzioso'
+    binary_sensor.random_binary_sensor:
+      <<: *customize
+    ################################################
+    ## Group
+    ################################################
+    group.location_tracker:
+      <<: *customize
+    group.dnd:
+      <<: *customize
+    group.period_of_day:
+      <<: *customize
+    group.period_of_day_volume:
+      <<: *customize
+    group.notification_settings_group:
+      <<: *customize
+    group.notification_settings:
+      <<: *customize
+    group.assistant_settings:
+      <<: *customize
+    group.automations_notification_hub:
+      <<: *customize
+      icon: mdi:account-tie
+    ################################################
+    ## input Boolean
+    ################################################
+    input_boolean.guest_mode:
+      <<: *customize
+    input_boolean.priority_message:
+      <<: *customize
+    input_boolean.speech_notifications:
+      <<: *customize
+    input_boolean.text_notifications:
+      <<: *customize
+    input_boolean.screen_notifications:
+      <<: *customize
+    input_boolean.last_message:
+      <<: *customize
+    input_boolean.random_fact:
+      <<: *customize
+    ################################################
+    ## input Datetime
+    ################################################
+    input_datetime.dnd_start:
+      <<: *customize
+    input_datetime.dnd_end:
+      <<: *customize
+    input_datetime.start_morning:
+      <<: *customize
+    input_datetime.start_afternoon:
+      <<: *customize
+    input_datetime.start_evening:
+      <<: *customize
+    input_datetime.start_night:
+      <<: *customize
+    ################################################
+    ## input Number
+    ################################################
+    input_number.intercom_message_volume:
+      <<: *customize
+      friendly_name: 'Volume'
+    input_number.morning_volume:
+      <<: *customize
+    input_number.afternoon_volume:
+      <<: *customize
+    input_number.evening_volume:
+      <<: *customize
+    input_number.night_volume:
+      <<: *customize
+    ################################################
+    ## input Select
+    ################################################
+    input_select.default_notify:
+      <<: *customize
+    ################################################
+    ## input Text
+    ################################################
+    input_text.intercom_message_hub:
+      <<: *customize
+      friendly_name: 'Messaggio'
+      icon: mdi:bullhorn
+    input_text.personal_assistant_name:
+      <<: *customize
+    ################################################
+    ## Script
+    ################################################
+    script.my_notify:
+      <<: *customize
+    script.notification_hub:
+      <<: *customize
+    script.nullo:
+      <<: *customize
+    ################################################
+    ## Sensor
+    ################################################
+    sensor.last_message:
+      <<: *customize
+      friendly_name: 'Salva Ultimo Messaggio'
+      icon: mdi:repeat
+    sensor.period_of_day:
+      <<: *customize
+    sensor.period_of_day_volume:
+      <<: *customize
+
+###############################################################################
+## PACKAGES TEMPLATE
+###############################################################################
+
+#######################################-#######################################
+##                                   GROUP
+#######################################-#######################################
+group:
+  location_tracker:
+    name: Dispositivi tracciati
+    entities: !secret location_tracker_hub
+
+  dnd:
+    name: Non disturbare
+    view: yes
+    icon: mdi:text-to-speech
+    entities:
+      - input_datetime.dnd_start
+      - input_datetime.dnd_end
+      - binary_sensor.dnd
+
+  period_of_day:
+    name: Parte del Giorgio
+    view: yes
+    icon: mdi:timetable
+    entities:
+      - input_datetime.start_morning
+      - input_datetime.start_afternoon
+      - input_datetime.start_evening
+      - input_datetime.start_night
+
+  period_of_day_volume:
+    name: Controllo Volumi
+    view: yes
+    icon: mdi:volume-medium
+    entities:
+      - sensor.period_of_day_volume
+      - input_number.morning_volume
+      - input_number.afternoon_volume
+      - input_number.evening_volume
+      - input_number.night_volume
+
+  notification_settings_group:
+    name: Gruppo Impostazioni Notifiche
+    view: yes
+    icon: mdi:text-to-speech
+    entities:
+      - automation.crea_gruppo_automazioni_notifiche
+      - group.notification_settings
+      - group.assistant_settings
+      - group.automations_notification_hub
+
+  notification_settings:
+    name: Impostazioni notifiche
+    view: yes
+    icon: mdi:text-to-speech
+    entities:
+      - input_boolean.last_message
+      - input_boolean.guest_mode
+      - input_boolean.priority_message
+      - input_boolean.tts_google
+      - input_boolean.google_switch
+      - input_boolean.alexa_switch
+      - input_boolean.speech_notifications
+      - input_boolean.text_notifications
+      - input_boolean.screen_notifications
+      - automation.send_intercom_message_hub
+      - input_number.intercom_message_volume
+      - input_text.intercom_message_hub
+
+  assistant_settings:
+    name: Impostazioni Assistente
+    entities:
+      - input_text.personal_assistant_name
+      - input_datetime.dnd_start
+      - input_datetime.dnd_end
+      - binary_sensor.dnd
+      - input_select.default_notify
+#######################################-#######################################
+##                                   INPUT
+#######################################-#######################################
+input_datetime:
+  dnd_start:
+    name: Non disturbare inizio
+    has_date: false
+    has_time: true
+
+  dnd_end:
+    name: Non disturbare fine
+    has_date: false
+    has_time: true
+
+  start_morning:
+    name: Mattina
+    has_date: false
+    has_time: true
+
+  start_afternoon:
+    name: Pomeriggio
+    has_date: false
+    has_time: true
+
+  start_evening:
+    name: Sera
+    has_date: false
+    has_time: true
+
+  start_night:
+    name: Notte
+    has_date: false
+    has_time: true
+
+
+input_boolean:
+  guest_mode:
+    name: Modo Ospite
+    icon: mdi:account-multiple-plus
+
+  priority_message:
+    name: Messaggio Prioritario
+    icon: mdi:message-alert
+
+  speech_notifications:
+    name: Notifiche Vocali
+    icon: mdi:voice
+    initial: on
+
+  text_notifications:
+    name: Notifiche di testo
+    icon: mdi:cellphone-message
+    initial: on
+
+  screen_notifications:
+    name: Notifiche Persistenti
+    icon: mdi:message-bulleted
+
+  last_message:
+    name: Ultimo Messaggio
+    icon: mdi:repeat-once
+
+  random_fact:
+    name: Fatto Casuale
+    icon: mdi:shape-circle-plus
+
+input_number:
+  morning_volume:
+    name: Vol Mattina
+    icon: mdi:volume-high
+    min: 0
+    max: 100
+    step: 10
+    unit_of_measurement: '%'
+  afternoon_volume:
+    name: Vol Pomeriggio
+    icon: mdi:volume-high
+    min: 0
+    max: 100
+    step: 10
+    unit_of_measurement: '%'
+  evening_volume:
+    name: Vol Sera
+    icon: mdi:volume-high
+    min: 0
+    max: 100
+    step: 10
+    unit_of_measurement: '%'
+  night_volume:
+    name: Vol Notte
+    icon: mdi:volume-high
+    min: 0
+    max: 100
+    step: 10
+    unit_of_measurement: '%'
+  intercom_message_volume:
+    name: Volume Interfono
+    icon: mdi:volume-high
+    min: 0
+    max: 100
+    step: 10
+    unit_of_measurement: '%'
+  default_restore_volume:
+    name: Volume Ripristino Predefinito
+    icon: mdi:volume-high
+    min: 0
+    max: 100
+    step: 10
+    unit_of_measurement: '%'
+
+input_text:
+  intercom_message_hub:
+    name: Messaggio Interfono
+    max: 255
+    initial: ''
+
+  personal_assistant_name:
+    name: Nome Assistente
+
+input_select:
+  default_notify:
+    name: Notifica Predefinita
+    icon: mdi:message-settings-variant
+    options: !secret default_notify_hub
+
+#######################################-#######################################
+##                                  SENSOR
+#######################################-#######################################
+sensor:
+  - platform: mqtt
+    state_topic: "hub/last_message"
+    name: "Last Message"
+
+  - platform: template
+    sensors:
+      period_of_day:
+        friendly_name: 'Periodo del Giorno'
+        entity_id: sensor.time
+        value_template: >
+          {% set nt = now().time() %}
+          {% set nt = (nt.hour*60+nt.minute)*60+nt.second %}
+          {% if state_attr('input_datetime.start_morning', 'timestamp') <= nt < state_attr('input_datetime.start_afternoon', 'timestamp') %} Mattino
+          {% elif state_attr('input_datetime.start_afternoon', 'timestamp') <= nt < state_attr('input_datetime.start_evening', 'timestamp') %} Pomeriggio
+          {% elif state_attr('input_datetime.start_evening', 'timestamp') <= nt < state_attr('input_datetime.start_night', 'timestamp') %} Sera
+          {% elif (state_attr('input_datetime.start_evening', 'timestamp') > state_attr('input_datetime.start_night', 'timestamp'))
+          and (nt > state_attr('input_datetime.start_evening', 'timestamp') or nt < state_attr('input_datetime.start_night', 'timestamp')) %} Sera
+          {% else %} Notte
+          {% endif %}
+        icon_template: >
+          {% if is_state('sensor.period_of_day', 'Mattino') %} mdi:weather-sunset-up
+          {% elif is_state('sensor.period_of_day', 'Pomeriggio') %} mdi:weather-sunny
+          {% elif is_state('sensor.period_of_day', 'Sera') %} mdi:weather-sunset-down
+          {% else %} mdi:weather-night
+          {% endif %}
+
+      period_of_day_volume:
+        friendly_name: 'Volume Attuale'
+        entity_id: sensor.time, sensor.period_of_day ,input_number.morning_volume, input_number.afternoon_volume, input_number.evening_volume, input_number.night_volume
+        value_template: >
+          {% if is_state('sensor.period_of_day', 'Mattino') %} {{states('input_number.morning_volume') | int / 100 }}
+          {% elif is_state('sensor.period_of_day', 'Pomeriggio') %} {{states('input_number.afternoon_volume') | int / 100 }}
+          {% elif is_state('sensor.period_of_day', 'Sera') %} {{states('input_number.evening_volume') | int / 100 }}
+          {% else %} {{states('input_number.night_volume') | int / 100 }}
+          {% endif %}
+        icon_template: >
+          {% if is_state('sensor.period_of_day_volume', '0.0') %}mdi:volume-off
+          {% elif is_state('sensor.period_of_day_volume', '0.1') %}mdi:volume-low
+          {% elif is_state('sensor.period_of_day_volume', '0.2') %}mdi:volume-low
+          {% elif is_state('sensor.period_of_day_volume', '0.3') %}mdi:volume-low
+          {% elif is_state('sensor.period_of_day_volume', '0.4') %}mdi:volume-medium
+          {% elif is_state('sensor.period_of_day_volume', '0.5') %}mdi:volume-medium
+          {% elif is_state('sensor.period_of_day_volume', '0.6') %}mdi:volume-medium
+          {% else %}mdi:volume-high
+          {% endif %}
+
+#######################################-#######################################
+##                               BINARY SENSOR
+#######################################-#######################################
+binary_sensor:
+  - platform: template
+    sensors:
+      dnd:
+        entity_id: sensor.time, input_datetime.dnd_start, input_datetime.dnd_end
+        friendly_name: "Non Disturbare"
+        value_template: >
+          {% set t = now().time() %}
+          {% set t = (t.hour*60+t.minute)*60+t.second %}
+          {% set start = state_attr('input_datetime.dnd_start', 'timestamp') %}
+          {% set stop = state_attr('input_datetime.dnd_end', 'timestamp') %}
+          {% if start < stop %}
+            {{ start < t < stop }}
+          {% else %}
+            {{ t > start or t < stop }}
+          {% endif %}
+        icon_template: >
+          {% if is_state('binary_sensor.dnd','off') %} mdi:do-not-disturb-off {% else %} mdi:do-not-disturb {% endif %}
+
+  - platform: random
+
+#######################################-#######################################
+##                                  SCRIPT
+#######################################-#######################################
+script:
+  #----------------------------------------------------------------------------------------------------#
+  # SCRIPT PRINCIPLAE - la sequenza messaggi viene generata con l'uso di macro dal template incluso    #
+  #----------------------------------------------------------------------------------------------------#
+  my_notify:
+    alias: Mia notifica
+    sequence:
+      - service: script.notification_hub #python_script.test #
+        data_template:
+          # ********************************************* #
+          #                    VARIABILI                  #
+          # ********************************************* #
+          title: >
+            {{ title }}
+          link: >
+            {{ link }}
+          volume: >
+            {{ volume }}
+          mute: >
+            {{ mute }}
+          no_show: >
+            {{ no_show }}
+          notify: >
+            {{ notify }}
+          url: >-
+            {{ url }}
+          file: >-
+            {{ file }}
+          caption: >-
+            {{ caption }}
+          alexa_type: >
+            {{ alexa_type }}
+          alexa_method: >
+            {{ alexa_method }}
+          alexa_push: >
+            {{ alexa_push }}
+          media_player_google: >-
+            {{ media_player_google }}
+          media_player_alexa: >
+            {{ media_player_alexa }}
+
+          #######################################-#######################################
+          ## FILE DA INCLUDERE PER LE MACRO - NOTE: NON MODIFICARE L'ESTENZIONE .yml   ##
+          #######################################-#######################################
+          #-----------------------------------------------------------------------------#
+          ## EX !include /config/include/motore_notifica_hp.yaml
+          build_message: !include hub_build_message.yml
+          #-----------------------------------------------------------------------------#
+
+  #----------------------------------------------------------------------------------------------------#
+  # Da my_notify - Notification_hub è il centro di smistamento dei messaggi Salva/TTS/Testo/Web-UI     #
+  #----------------------------------------------------------------------------------------------------#
+  notification_hub:
+    alias: Centro Notifiche
+    sequence:
+      - service: mqtt.publish
+        data_template:
+          topic: "hub/setting"
+          payload: >-
+            {
+              "title" : "{{ title }}",
+              "link" : "{{ link }}",
+              "volume" : "{{ volume }}",
+              "mute" : "{{ mute }}",
+              "no_show" : "{{ no_show }}",
+              "notify" : "{{ notify }}",
+              "url" : "{{ url }}",
+              "file" : "{{ file }}",
+              "caption" : "{{ caption }}",
+              "alexa_type" : "{{ alexa_type }}",
+              "alexa_method" : "{{ alexa_method }}",
+              "alexa_push" : "{{ alexa_push }}",
+              "media_player_google" : "{{ media_player_google }}",
+              "media_player_alexa" : "{{ media_player_alexa }}",
+              "message" : "{{ build_message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}"
+            }
+          retain: false
+          qos: 0
+      - condition: state
+        entity_id: input_boolean.last_message
+        state: 'off'
+      - service: mqtt.publish
+        data_template:
+          topic: "hub/last_message"
+          payload: >
+            [{{ now().strftime('%-H') }}:{{ now().strftime('%M') }}] {{ build_message | replace('\n','') | replace('   ',' ') | replace('  ',' ') | truncate(245)}}
+          retain: true
+
+  empty:
+    alias: NULLO
+    sequence:
+      - service: script.turn_off
+        entity_id: script.empty
+
+#######################################-#######################################
+##                                 AUTOMATION
+#######################################-#######################################
+automation:
+  #----------------------------------------------------------------------------------------------------#
+  # NOTIFY - Viene chiamato il servizio di notifica. (es. notify.telegram, notify.family)  #
+  #----------------------------------------------------------------------------------------------------#
+  - id: mqtt_notifications_text_hub
+    alias: MQTT Notifications text
+    initial_state: true
+    trigger:
+      - platform: mqtt
+        topic: "hub/setting"
+    condition:
+      - condition: state
+        entity_id: input_boolean.text_notifications
+        state: 'on'
+      - condition: template
+        value_template: >
+          {{ not trigger.payload_json.notify | regex_match(find='0') }}
+      - condition: template
+        value_template: >-
+          {{ trigger.payload != '' }}
+    action:
+      - service_template: >-
+          {% macro notification() %}
+          {% set options = states.input_select.default_notify.attributes['options'] %}
+            {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
+              notify.{{ item | lower | replace(' ', '_') }}
+            {% endfor %}
+          {% endmacro %}
+          {{ notification() }}
+          {% if notification() | trim == '' %}
+            notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
+          {% endif %}
+        data_template:
+          title: >
+            *[{{ states('input_text.personal_assistant_name') }}: {{ now().strftime('%H:%M') }}] {{ trigger.payload_json.title }}*
+          message: >
+            {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
+
+      - service_template: >-
+          {% macro notification() %}
+            {% set options = states.input_select.default_notify.attributes['options'] %}
+            {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
+              notify.{{ item | lower | replace(' ', '_') }}
+            {% endfor %}
+          {% endmacro %}
+          {% if notification() | trim == '' and (trigger.payload_json.url | length > 1 or trigger.payload_json.file | length > 1) %}
+            notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
+          {% elif notification() and (trigger.payload_json.url | length > 1 or trigger.payload_json.file | length > 1) %}
+          {{ notification() }}
+          {% else %}
+            script.empty
+          {% endif %}
+        data_template:
+          title: >
+            *[{{ states('input_text.personal_assistant_name') }}: {{ now().strftime('%H:%M') }}] {{ trigger.payload_json.title }}*
+          message: >
+            {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
+          data:
+            photo:
+              # - url: >-
+              #     {{ trigger.payload_json.url }}
+              - file: >-
+                  {{ trigger.payload_json.file }}
+                caption: >-
+                  {{ trigger.payload_json.caption }}
+
+  #----------------------------------------------------------------------------------------------------#
+  # PERSISTENT NOTIFICATIONS - Servizio di notifica persistente sulla web-ui                           #
+  #----------------------------------------------------------------------------------------------------#
+  - id: mqtt_persistent_notifications_hub
+    alias: MQTT Notifications text
+    initial_state: true
+    trigger:
+      - platform: mqtt
+        topic: "hub/setting"
+    condition:
+      - condition: state
+        entity_id: input_boolean.screen_notifications
+        state: 'on'
+      - condition: template
+        value_template: >
+          {{ trigger.payload_json.no_show | length == 0 }}
+      - condition: template
+        value_template: >-
+          {{ trigger.payload != '' }}
+    action:
+      - service: persistent_notification.create
+        data_template:
+          notification_id: "info_messages"
+          title: "Centro Messaggi"
+          message: >
+            {% if is_state('persistent_notification.info_messages' , 'notifying') %}
+              {{ states.persistent_notification.info_messages.attributes.message }}
+
+              {{ now().strftime('%H:%M') }} - {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
+            {% else %}
+              {{ now().strftime('%H:%M') }} - {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
+            {% endif %}
+
+  #----------------------------------------------------------------------------------------------------#
+  # INTERFONO #
+  #----------------------------------------------------------------------------------------------------#
+  - id: send_intercom_message_hub
+    alias: send_intercom_message_hub
+    initial_state: true
+    hide_entity: true
+    trigger:
+      - platform: state
+        entity_id: input_text.intercom_message_hub
+    condition:
+      condition: template
+      value_template: >
+        {{ states('input_text.intercom_message_hub') | length > 0 }}
+    action:
+      - wait_template: >
+          {{ is_state('script.my_notify', 'off') }}
+      - service: script.my_notify
+        data:
+          call_no_annuncio: 1
+          call_no_fatto_casuale: 1
+          title: "Interfono"
+        data_template:
+          volume: >
+            {{ states('input_number.intercom_message_volume') | int / 100 }}
+          message: >
+            {{ states('input_text.intercom_message_hub') }} {{' '}}
+      - service: input_text.set_value
+        data:
+          entity_id: input_text.intercom_message_hub
+          value: ''
+
+  #----------------------------------------------------------------------------------------------------#
+  # LAST MESSAGE - Ripete l'ultimo messaggio inviato                                       #
+  #----------------------------------------------------------------------------------------------------#
+  - id: notification_repeat_last_message_hub
+    alias: Notifica Ripeti Ultimo Messaggio
+    trigger:
+      - platform: state
+        entity_id: input_boolean.last_message
+        to: 'on'
+    action:
+      - service: input_boolean.turn_on
+        data:
+          entity_id: input_boolean.priority_message
+      - service: script.my_notify
+        data:
+          call_no_annuncio: 1
+          call_no_fatto_casuale: 1
+          title: "Ultimo messaggio"
+        data_template:
+          volume: >
+            {{ states('input_number.intercom_message_volume') | int / 100 }}
+          message: >
+            {{ states('sensor.last_message') }}
+      - service: input_boolean.turn_off
+        entity_id:
+          - input_boolean.last_message
+          - input_boolean.priority_message
+
+  #----------------------------------------------------------------------------------------------------#
+  # GUEST - Modalità ospite On e Off - Il TTS funziona anche se si è fuori casa.                       #
+  #         Utile anche se si volgiono escludere delle automazioni se ci sono ospiti in casa           #
+  #----------------------------------------------------------------------------------------------------#
+  - id: guest_mode_hub
+    alias: Modo Ospite
+    trigger:
+      platform: state
+      entity_id: input_boolean.guest_mode
+    action:
+      - wait_template: >
+          {{ is_state('script.my_notify', 'off') }}
+      - service: script.my_notify
+        data:
+          call_no_annuncio: 1
+          call_modo_ospite: 1
+          call_no_fatto_casuale: 1
+        data_template:
+          title: >
+            Modalità Ospite - {{ trigger.to_state.state | upper }}
+
+  #----------------------------------------------------------------------------------------------------#
+  # GROUP TTS - Crea Gruppo Notifiche in base all'attributo ID: + HUB                                  #
+  #----------------------------------------------------------------------------------------------------#
+  - id: create_notification_automation_group_hub
+    alias: Crea Gruppo Automazioni Notifiche
+    initial_state: true
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: automation.crea_gruppo_automazioni_notifiche
+        to: 'on'
+    action:
+      - delay: 00:00:30
+      - service: group.set
+        data_template:
+          object_id: "automations_notification_hub"
+          name: "Automazioni Centro Notifiche"
+          icon: mdi:group
+          visible: true
+          entities: >
+            {%- for item in states.automation if ((item.attributes.id | lower).endswith('hub')) -%}
+            {{ item.entity_id }}{% if not loop.last %}, {% endif %}
+            {%- endfor -%}
+
+  #----------------------------------------------------------------------------------------------------#
+  # AVVISO Errori Notifiche - Solo tramite notifiche persistenti 
+  #----------------------------------------------------------------------------------------------------#
+  - id: service_notify_error_hub
+    alias: Avviso errore servizio notifica
+    initial_state: true
+    trigger:
+      platform: event
+      event_type: system_log_event
+    condition:
+      condition: template
+      value_template: >
+        {{ 'Service notify.' in trigger.event.data.message }}
+    action:
+      - service: persistent_notification.create
+        data_template:
+          notification_id: "info_messages"
+          title: "Centro Messaggi"
+          message: >-
+            {% if is_state('persistent_notification.info_messages' , 'notifying') %}
+              {{ states.persistent_notification.info_messages.attributes.message }}
+
+              {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
+            {% else %}
+              {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
+            {% endif %}
+
