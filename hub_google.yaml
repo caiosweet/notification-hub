@@ -1,4 +1,4 @@
-#### Card Lovelace
+#### Card Lovelace minimal
   # type: entities
   # title: Google
   # show_header_toggle: false
@@ -9,7 +9,8 @@
   #   - entity: input_boolean.tts_google_mode
   #   - entity: input_select.language
   #   - entity: input_select.notification_media_player_google
-  # #  - entity: input_number.google_volume_storage
+  # #  - entity: input_number.google_volume_storage ## Salva il volume precedente se possibile
+  # #  - automation.google_volume_restore ## Attiva/Disattiva il salvataggio del volume precedente
   #############################################################################
 
 #######################################-#######################################
@@ -156,9 +157,6 @@ automation:
         event_data:
           entity_id: timer.volume_google
     # condition:
-    #   - condition: template
-    #     value_template: >
-    #       {{ is_state('input_boolean.google_switch', 'on') }}
     action:
       - service: media_player.volume_set
         data_template:
@@ -261,6 +259,7 @@ automation:
             {% else %}
               {{ trigger.payload_json.volume }}
             {% endif %}
+
 
       - service: timer.start
         data_template:

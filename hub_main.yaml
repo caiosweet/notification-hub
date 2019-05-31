@@ -17,8 +17,11 @@
   #    - name: happyleavesaoc [my-home-automation]
   #      url: https://github.com/happyleavesaoc/my-home-automation/blob/master/homeassistant/packages/briefings.yaml
 
-#### Card Lovelace
-
+#### Tab View and Card Lovelace minimal
+  # title: Centro Notifiche
+  # path: centro_notifiche
+  # icon: mdi:account-tie
+  # cards:
   ################### Centro Notifiche ######################
   # type: entities
   # title: Centro Notifiche
@@ -35,6 +38,7 @@
   #     service: input_boolean.turn_on
   #     service_data:
   #       entity_id: input_boolean.last_message
+  #   - entity: input_number.default_restore_volume ## Volume di default quando non in playing.
   #   - type: section
   #     label: Modalità
   #   - entity: input_boolean.last_message
@@ -180,6 +184,9 @@ homeassistant:
       <<: *customize
     input_number.night_volume:
       <<: *customize
+    input_number.default_restore_volume:
+      <<: *customize
+      friendly_name: 'Volume Rispristino'
     ################################################
     ## input Select
     ################################################
@@ -241,6 +248,7 @@ group:
     view: yes
     icon: mdi:timetable
     entities:
+      - sensor.period_of_day
       - input_datetime.start_morning
       - input_datetime.start_afternoon
       - input_datetime.start_evening
@@ -256,6 +264,7 @@ group:
       - input_number.afternoon_volume
       - input_number.evening_volume
       - input_number.night_volume
+      - input_number.default_restore_volume
 
   notification_settings_group:
     name: Gruppo Impostazioni Notifiche
@@ -502,7 +511,7 @@ script:
   my_notify:
     alias: Mia notifica
     sequence:
-      - service: script.notification_hub #python_script.test #
+      - service: script.notification_hub
         data_template:
           # ********************************************* #
           #                    VARIABILI                  #
