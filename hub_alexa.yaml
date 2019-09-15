@@ -191,7 +191,7 @@ input_select:
 device_tracker:
   - platform: mqtt
     devices:
-        player_alexa: 'hub/alexa'
+      player_alexa: 'hub/alexa'
 
 #######################################-#######################################
 ##                                   TIMER
@@ -357,7 +357,7 @@ automation:
             - input_boolean.priority_message
       
       # SET VOL - Salva il volume solo se il player è in rirpoduzione.
-      #- service: script.set_vol # Salva il volume solo se il player è in rirpoduzione.
+      #- service: script.set_vol
 
       # Commentare il service qui sotto, se si usa lo script set_vol
       - service: input_number.set_value
@@ -384,8 +384,6 @@ automation:
         data_template:
           target: >
             {{ states('device_tracker.player_alexa') }}
-          title: >
-            {{ trigger.payload_json.title }}
           message: >
             {{ trigger.payload_json.message }}
           data:

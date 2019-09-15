@@ -528,6 +528,8 @@ script:
             {{ no_show }}
           notify: >
             {{ notify }}
+          location: >
+            {{ location }}
           url: >-
             {{ url }}
           file: >-
@@ -544,12 +546,13 @@ script:
             {{ media_player_google }}
           media_player_alexa: >
             {{ media_player_alexa }}
+          tts_message: >-
+            {{ tts_message }}
 
           #######################################-#######################################
-          ## FILE DA INCLUDERE PER LE MACRO - NOTE: NON MODIFICARE L'ESTENZIONE .yml   ##
+          ## FILE DA INCLUDERE PER LE MACRO - NOTE: NON MODIFICARE L'ESTENSIONE .yml   ##
           #######################################-#######################################
           #-----------------------------------------------------------------------------#
-          ## EX !include /config/include/motore_notifica_hp.yaml
           build_message: !include hub_build_message.yml
           #-----------------------------------------------------------------------------#
 
@@ -570,6 +573,7 @@ script:
               "mute" : "{{ mute }}",
               "no_show" : "{{ no_show }}",
               "notify" : "{{ notify }}",
+              "location" : "{{ location }}",
               "url" : "{{ url }}",
               "file" : "{{ file }}",
               "caption" : "{{ caption }}",
@@ -578,6 +582,7 @@ script:
               "alexa_push" : "{{ alexa_push }}",
               "media_player_google" : "{{ media_player_google }}",
               "media_player_alexa" : "{{ media_player_alexa }}",
+              "tts_message" : "{{ tts_message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}",
               "message" : "{{ build_message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}"
             }
           retain: false
@@ -617,28 +622,35 @@ automation:
         state: 'on'
       - condition: template
         value_template: >
+          {{ (trigger.payload_json.location == states.group.location_tracker.state) or (trigger.payload_json.location == '') }}
+      - condition: template
+        value_template: >
           {{ not trigger.payload_json.notify | regex_match(find='0') }}
       - condition: template
         value_template: >-
           {{ trigger.payload != '' }}
     action:
       - service_template: >-
-          {% macro notification() %}
-          {% set options = states.input_select.default_notify.attributes['options'] %}
-            {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
-              notify.{{ item | lower | replace(' ', '_') }}
-            {% endfor %}
-          {% endmacro %}
-          {{ notification() }}
-          {% if notification() | trim == '' %}
-            notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
+          {% if trigger.payload_json.file | length == 0 %}
+            {% macro notification() %}
+            {% set options = states.input_select.default_notify.attributes['options'] %}
+              {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
+                notify.{{ item | lower | replace(' ', '_') }}
+              {% endfor %}
+            {% endmacro %}
+            {{ notification() }}
+            {% if notification() | trim == '' %}
+              notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
+            {% endif %}    
+          {% else %}
+            script.empty
           {% endif %}
         data_template:
           title: >
             *[{{ states('input_text.personal_assistant_name') }}: {{ now().strftime('%H:%M') }}] {{ trigger.payload_json.title }}*
           message: >
             {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
-
+            
       - service_template: >-
           {% macro notification() %}
             {% set options = states.input_select.default_notify.attributes['options'] %}
@@ -664,8 +676,24 @@ automation:
               #     {{ trigger.payload_json.url }}
               - file: >-
                   {{ trigger.payload_json.file }}
-                caption: >-
+                caption: |
+                  {% if trigger.payload_json.caption |length == 0 %}
+                  *{{ trigger.payload_json.title }}*
+                  {{ trigger.payload_json.message}}
+                  {% else %}
                   {{ trigger.payload_json.caption }}
+                  {% endif %}
+
+
+
+      # - condition: template
+      #   value_template: >
+      #     {{ states.group.location_tracker.state == 'not_home' }}
+      # - service: mqtt.publish
+      #   data_template:
+      #     topic: homeassistant/tts/android_oneplus_5t_tts/tts
+      #     payload: >
+      #       {{ trigger.payload_json.message }}
 
   #----------------------------------------------------------------------------------------------------#
   # PERSISTENT NOTIFICATIONS - Servizio di notifica persistente sulla web-ui                           #
@@ -715,8 +743,6 @@ automation:
       value_template: >
         {{ states('input_text.intercom_message_hub') | length > 0 }}
     action:
-      - wait_template: >
-          {{ is_state('script.my_notify', 'off') }}
       - service: script.my_notify
         data:
           call_no_annuncio: 1
@@ -737,6 +763,7 @@ automation:
   #----------------------------------------------------------------------------------------------------#
   - id: notification_repeat_last_message_hub
     alias: Notifica Ripeti Ultimo Messaggio
+    initial_state: true
     trigger:
       - platform: state
         entity_id: input_boolean.last_message
@@ -766,12 +793,11 @@ automation:
   #----------------------------------------------------------------------------------------------------#
   - id: guest_mode_hub
     alias: Modo Ospite
+    initial_state: true
     trigger:
       platform: state
       entity_id: input_boolean.guest_mode
     action:
-      - wait_template: >
-          {{ is_state('script.my_notify', 'off') }}
       - service: script.my_notify
         data:
           call_no_annuncio: 1
@@ -833,3 +859,16 @@ automation:
               {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
             {% endif %}
 
+##  Jinja2 template ##
+# {% set nome = 'Centro Notifiche' %}
+# Numero entità: {{ states | selectattr('attributes.package', 'eq', nome) |list | count }}
+
+# - type: entities
+#   title: {{nome}}
+#   show_header_toggle: false
+#   entities:
+# {% for item in states if nome in item.attributes.package  -%}
+# {% if loop.first %}{% elif loop.last %}
+# {% else %}
+# {% endif %}    - entity: {{item.entity_id -}}
+# {% endfor %}

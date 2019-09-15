@@ -133,7 +133,7 @@ input_select:
 device_tracker:
   - platform: mqtt
     devices:
-        player_google: 'hub/google'
+      player_google: 'hub/google'
 
 #######################################-#######################################
 ##                                   TIMER
@@ -264,7 +264,7 @@ automation:
       - service: timer.start
         data_template:
           entity_id: timer.volume_google
-          duration: "00:00:{{states('sensor.last_message') | wordcount // 2+2 }}"
+          duration: "00:00:{{states('sensor.last_message') | wordcount // 2+3 }}"
 
 #######################################-#######################################
 ##                                  SCRIPT
@@ -286,14 +286,15 @@ script:
             {{ message }}
   #----------------------------------------------------------------------------------------------------#
   # Da Automazione MQTT Notifications tts Google - Google Assistant Web Server - #
+  # Addons Usato in questa versione (64-bit AMD) lo trovi qui https://github.com/marcelveldt/hassio-addons-repo
   #----------------------------------------------------------------------------------------------------#
   tts_google_assistant_mode:
     alias: Modo TTS Google Assistant
     sequence:
-      - service: notify.google_assistant_command
+      - service: notify.google_assistant
         data_template:
           message: >-
-            di a tutti {{ message }}
+            {{ message }}
 
 #######################################-#######################################
 ##                                  SENSOR

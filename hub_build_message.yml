@@ -76,7 +76,7 @@
       "info... ",
       "Forse può essere utile sapere... ",
       "Forse ti è sfuggito, ma... ",
-      "Odio ripetermi, sai che... ",
+      "Sai che... ",
       "Giusto per conoscenza: ",
       "E se ti dicessi che... ",
       "Mmm, aggiungo: ",
@@ -174,27 +174,8 @@
     {{ nuovo_dispositivo | random }}
   {%- endmacro -%}
 
-  {%- macro iss() -%} {# ISS e Meteo #}
-    {% if is_state('binary_sensor.iss', 'on') %}
-      La stazione spaziale internazionale è sopra di noi ora. Ci sono 
-      {{ state_attr('binary_sensor.iss' , 'number_of_people_in_space') }} persone nello spazio in questo momento.
-    {% else %}
-      {{ meteo_ora() }}
-    {% endif %}
-  {%- endmacro -%}
-
-  {%- macro luna() -%} {# Luna e Meteo #}
-    {% if states('sensor.moon') == 'full_moon' %}
-      C'è la luna piena stasera, dai un'occhiata!, 
-    {% elif states('sensor.moon') == 'waning_gibbous' %}
-      Luna gibbosa calante!, è il momento adatto per tagliarsi i capelli!, 
-    {% else %}
-      {{ meteo_ora() }}
-    {% endif %}
-  {%- endmacro -%}
-
   {%- macro meteo_ora() -%}
-    Fuori, sarà {{ states('sensor.dark_sky_hourly_summary') }}
+    Fuori, sarà {{ states('sensor.dark_sky_hourly_summary')|lower }}
   {%- endmacro -%}
 
   {%- macro controllo_luci() -%}
@@ -213,7 +194,7 @@
 
   {%- macro controllo_prese() -%}
     {% if states.group.all_switches.state != 'off' %}
-      {% set n = states.switch | selectattr('state', 'eq', 'on') |rejectattr('attributes.package')| list | count %}
+      {% set n = states.switch | selectattr('state', 'eq', 'on') | rejectattr('attributes.package')| list | count %}
       {% set x = states.switch | selectattr('state', 'eq', 'on') | rejectattr('attributes.package') |map(attribute='name')|join(', ') %}
       {% if n == 1 %}
         c'è un interruttore acceso. {{x}}
@@ -222,6 +203,20 @@
       {% endif %}
     {% else %}
         Nessun interruttore attivo.
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro controllo_infissi() -%}
+    {% if states.group.finestre_gr.state != 'off'  %}
+      {% set n = states.binary_sensor |selectattr('state', 'eq', 'on')|selectattr('attributes.device_class', 'eq', 'window')|list|count %}
+      {% set x = states.binary_sensor |selectattr('state', 'eq', 'on')|selectattr('attributes.device_class', 'eq', 'window')|map(attribute='name')|join(', ') %}
+      {% if n == 1 %}
+        c'è un infisso aperto in casa: {{x}}
+      {% elif  n > 1 %}
+        ci sono: {{n}} infissi aperti in questo momento. {{x}}
+      {% endif %}
+    {% else %}
+        Tutti gli infissi sono chiusi.
     {% endif %}
   {%- endmacro -%}
 
@@ -249,6 +244,45 @@
     {{ spegni | random }}
   {%- endmacro -%}
 
+  {# Lista Macro per un fatto casuale #}
+  {%- macro iss() -%} {# ISS e Meteo #}
+    {% if is_state('binary_sensor.iss', 'on') %}
+      La stazione spaziale internazionale è sopra di noi ora. Ci sono 
+      {{ state_attr('binary_sensor.iss' , 'number_of_people_in_space') }} persone nello spazio in questo momento.
+    {% else %}
+      {{ fatto_casuale() }}
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro luna() -%} {# Luna e Meteo #}
+    {% if states('sensor.moon') == 'full_moon' %}
+      C'è la luna piena stasera, dai un'occhiata!, 
+    {% elif states('sensor.moon') == 'waning_gibbous' %}
+      Luna gibbosa calante!, è il momento adatto per tagliarsi i capelli!, 
+    {% else %}
+      {{ fatto_casuale() }}
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro uv() -%}
+    {% if states.sensor.dark_sky_uv_index.state|int >= 6 %}
+      L'indice UV di oggi è: {{ states.sensor.dark_sky_uv_index.state }}. 
+    {% endif -%}
+    {% if 6 <= states.sensor.dark_sky_uv_index.state|int <= 7.9 %}
+      Se vai fuori, dovresti indossare una protezione solare.
+    {% elif 8 <= states.sensor.dark_sky_uv_index.state|int <= 10.9 %}
+      Questo è MOLTO ALTO. Assicurarsi di indossare la protezione solare e riapplicare.
+    {% elif states.sensor.dark_sky_uv_index.state|int >= 11 %}
+      Questo è ESTREMO. Dovresti essere molto prudente andando fuori.
+    {% else %}
+      {{ fatto_casuale() }}
+    {% endif %}
+  {%- endmacro -%}
+
+  {%- macro fatto_casuale() -%}
+    {{ ([iss, luna, meteo_ora, uv, controllo_luci, controllo_prese, controllo_infissi]|random)()|replace('\n','')|replace('   ',' ')|replace('  ',' ') }}
+  {%- endmacro -%}
+
   {# *************************************************************************** #}
   {#        INIZIO SEQUENZIALE DELLA COSTRUZIONE DEL MESSAGGIO / NOTICIA         #}
   {# *************************************************************************** #}
@@ -262,6 +296,7 @@
   {% if call_va_bene == 1 %} {{ va_bene () }} {% endif %}
 
   {% if call_informare == 1 %} {{ informare() }} {% endif %}
+  {% if call_info == 1 %} {{ info() }} {% endif %}
 
   {% if call_modo_ospite == 1 %} {{ modo_ospite() }} {% endif %}
 
@@ -275,6 +310,8 @@
   {% if call_fine_lavoro == 1 %} {{ fine_lavoro(person) }} {% endif %}
 
   {% if call_controllo_luci == 1 %} {{ controllo_luci() }} {% endif %}
+  {% if call_controllo_prese == 1 %} {{ controllo_prese() }} {% endif %}
+  {% if call_controllo_infissi == 1 %} {{ controllo_infissi() }} {% endif %}
 
   {# Contenuto del messaggio passato tramite automazioni/script #}
   {{ message }}
@@ -287,5 +324,5 @@
 
   {# chiama un fatto casuale #}
   {% if call_fatto_casuale == 1 or is_state ('input_boolean.random_fact', 'on') and is_state ('binary_sensor.random_binary_sensor' , 'on') and call_no_fatto_casuale != 1 %}
-  {{ info() }} {{ ([iss, luna, meteo_ora, controllo_luci, controllo_prese]|random)() }}
+  {{ info() }} {{ fatto_casuale() }}
   {% endif %}
