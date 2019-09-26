@@ -630,8 +630,9 @@ automation:
         value_template: >-
           {{ trigger.payload != '' }}
     action:
+      # MESSAGE 
       - service_template: >-
-          {% if trigger.payload_json.file | length == 0 %}
+          {% if trigger.payload_json.file | length == 0 and trigger.payload_json.url | length == 0 %}
             {% macro notification() %}
             {% set options = states.input_select.default_notify.attributes['options'] %}
               {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
@@ -641,7 +642,7 @@ automation:
             {{ notification() }}
             {% if notification() | trim == '' %}
               notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
-            {% endif %}    
+            {% endif %}
           {% else %}
             script.empty
           {% endif %}
@@ -650,18 +651,20 @@ automation:
             *[{{ states('input_text.personal_assistant_name') }}: {{ now().strftime('%H:%M') }}] {{ trigger.payload_json.title }}*
           message: >
             {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
-            
+
+      # FILE
       - service_template: >-
-          {% macro notification() %}
+          {% if trigger.payload_json.file | length > 0 %}
+            {% macro notification() %}
             {% set options = states.input_select.default_notify.attributes['options'] %}
-            {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
-              notify.{{ item | lower | replace(' ', '_') }}
-            {% endfor %}
-          {% endmacro %}
-          {% if notification() | trim == '' and (trigger.payload_json.url | length > 1 or trigger.payload_json.file | length > 1) %}
-            notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
-          {% elif notification() and (trigger.payload_json.url | length > 1 or trigger.payload_json.file | length > 1) %}
-          {{ notification() }}
+              {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
+                notify.{{ item | lower | replace(' ', '_') }}
+              {% endfor %}
+            {% endmacro %}
+            {{ notification() }}
+            {% if notification() | trim == '' %}
+              notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
+            {% endif %}
           {% else %}
             script.empty
           {% endif %}
@@ -672,8 +675,6 @@ automation:
             {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
           data:
             photo:
-              # - url: >-
-              #     {{ trigger.payload_json.url }}
               - file: >-
                   {{ trigger.payload_json.file }}
                 caption: |
@@ -684,16 +685,38 @@ automation:
                   {{ trigger.payload_json.caption }}
                   {% endif %}
 
-
-
-      # - condition: template
-      #   value_template: >
-      #     {{ states.group.location_tracker.state == 'not_home' }}
-      # - service: mqtt.publish
-      #   data_template:
-      #     topic: homeassistant/tts/android_oneplus_5t_tts/tts
-      #     payload: >
-      #       {{ trigger.payload_json.message }}
+      # URL
+      - service_template: >-
+          {% if trigger.payload_json.url | length > 0 %}
+            {% macro notification() %}
+            {% set options = states.input_select.default_notify.attributes['options'] %}
+              {% for item in options if item | lower | replace(' ', '_') == trigger.payload_json.notify | lower | replace(' ', '_') %}
+                notify.{{ item | lower | replace(' ', '_') }}
+              {% endfor %}
+            {% endmacro %}
+            {{ notification() }}
+            {% if notification() | trim == '' %}
+              notify.{{ states('input_select.default_notify') | lower | replace(' ', '_') }}
+            {% endif %}
+          {% else %}
+            script.empty
+          {% endif %}
+        data_template:
+          title: >
+            *[{{ states('input_text.personal_assistant_name') }}: {{ now().strftime('%H:%M') }}] {{ trigger.payload_json.title }}*
+          message: >
+            {{ trigger.payload_json.message }} {{ trigger.payload_json.link }}
+          data:
+            photo:
+              - url: >-
+                  {{ trigger.payload_json.url }}
+                caption: |
+                  {% if trigger.payload_json.caption |length == 0 %}
+                  *{{ trigger.payload_json.title }}*
+                  {{ trigger.payload_json.message}}
+                  {% else %}
+                  {{ trigger.payload_json.caption }}
+                  {% endif %}
 
   #----------------------------------------------------------------------------------------------------#
   # PERSISTENT NOTIFICATIONS - Servizio di notifica persistente sulla web-ui                           #
@@ -858,17 +881,3 @@ automation:
             {% else %}
               {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
             {% endif %}
-
-##  Jinja2 template ##
-# {% set nome = 'Centro Notifiche' %}
-# Numero entità: {{ states | selectattr('attributes.package', 'eq', nome) |list | count }}
-
-# - type: entities
-#   title: {{nome}}
-#   show_header_toggle: false
-#   entities:
-# {% for item in states if nome in item.attributes.package  -%}
-# {% if loop.first %}{% elif loop.last %}
-# {% else %}
-# {% endif %}    - entity: {{item.entity_id -}}
-# {% endfor %}
