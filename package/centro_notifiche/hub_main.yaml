@@ -1,7 +1,7 @@
 ### INFO
   #   @author         :   Caio - www.hassiohelp.eu
   #   @date           :   12/04/2019
-  #   @package        :   centro_notifiche v. 0.9
+  #   @package        :   centro_notifiche v. 1.0
   #   @description    :   Notification center (HUB) for TSS - Nofiy and Web-UI
   ############################################################################
   #weblink:
@@ -88,7 +88,7 @@ homeassistant:
     package.node_anchors:
       customize: &customize
         package: 'Centro Notifiche'
-        version: 'Main 0.9'
+        version: 'Main 1.0'
         author: 'Caio - www.hassiohelp.eu'
 
       expose: &expose
@@ -546,8 +546,8 @@ script:
             {{ media_player_google }}
           media_player_alexa: >
             {{ media_player_alexa }}
-          tts_message: >-
-            {{ tts_message }}
+          message_tts: >-
+            {{ message_tts }}
 
           #######################################-#######################################
           ## FILE DA INCLUDERE PER LE MACRO - NOTE: NON MODIFICARE L'ESTENSIONE .yml   ##
@@ -582,7 +582,7 @@ script:
               "alexa_push" : "{{ alexa_push }}",
               "media_player_google" : "{{ media_player_google }}",
               "media_player_alexa" : "{{ media_player_alexa }}",
-              "tts_message" : "{{ tts_message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}",
+              "message_tts" : "{{ message_tts | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}",
               "message" : "{{ build_message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}"
             }
           retain: false
@@ -855,29 +855,29 @@ automation:
             {{ item.entity_id }}{% if not loop.last %}, {% endif %}
             {%- endfor -%}
 
-  #----------------------------------------------------------------------------------------------------#
-  # AVVISO Errori Notifiche - Solo tramite notifiche persistenti 
-  #----------------------------------------------------------------------------------------------------#
-  - id: service_notify_error_hub
-    alias: Avviso errore servizio notifica
-    initial_state: true
-    trigger:
-      platform: event
-      event_type: system_log_event
-    condition:
-      condition: template
-      value_template: >
-        {{ 'Service notify.' in trigger.event.data.message }}
-    action:
-      - service: persistent_notification.create
-        data_template:
-          notification_id: "info_messages"
-          title: "Centro Messaggi"
-          message: >-
-            {% if is_state('persistent_notification.info_messages' , 'notifying') %}
-              {{ states.persistent_notification.info_messages.attributes.message }}
+  # #----------------------------------------------------------------------------------------------------#
+  # # AVVISO Errori Notifiche - Solo tramite notifiche persistenti 
+  # #----------------------------------------------------------------------------------------------------#
+  # - id: service_notify_error_hub
+  #   alias: Avviso errore servizio notifica
+  #   initial_state: true
+  #   trigger:
+  #     platform: event
+  #     event_type: system_log_event
+  #   condition:
+  #     condition: template
+  #     value_template: >
+  #       {{ 'Service notify.' in trigger.event.data.message }}
+  #   action:
+  #     - service: persistent_notification.create
+  #       data_template:
+  #         notification_id: "info_messages"
+  #         title: "Centro Messaggi"
+  #         message: >-
+  #           {% if is_state('persistent_notification.info_messages' , 'notifying') %}
+  #             {{ states.persistent_notification.info_messages.attributes.message }}
 
-              {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
-            {% else %}
-              {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
-            {% endif %}
+  #             {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
+  #           {% else %}
+  #             {{ "[ERRORE]" }} {{ now().strftime('%H:%M') }} - {{ trigger.event.data.message }} {{ link }}
+  #           {% endif %}

@@ -181,7 +181,7 @@
   {%- macro controllo_luci() -%}
     {% if states.group.all_lights.state != 'off' %}
       {% set n = states.light | selectattr('state', 'eq', 'on') | list | count %}
-      {% set x = states.light | selectattr('state', 'eq', 'on') |map(attribute='name')|join(', ') %}
+      {% set x = states.light | selectattr('state', 'eq', 'on') |join(', ', attribute='name') %}
       {% if n == 1 %}
         c'è una luce accesa in casa. Luce {{x}}
       {% elif  n > 1 %}
@@ -195,7 +195,7 @@
   {%- macro controllo_prese() -%}
     {% if states.group.all_switches.state != 'off' %}
       {% set n = states.switch | selectattr('state', 'eq', 'on') | rejectattr('attributes.package')| list | count %}
-      {% set x = states.switch | selectattr('state', 'eq', 'on') | rejectattr('attributes.package') |map(attribute='name')|join(', ') %}
+      {% set x = states.switch | selectattr('state', 'eq', 'on') | rejectattr('attributes.package') |join(', ', attribute='name') %}
       {% if n == 1 %}
         c'è un interruttore acceso. {{x}}
       {% elif n > 1 %}
@@ -209,7 +209,7 @@
   {%- macro controllo_infissi() -%}
     {% if states.group.finestre_gr.state != 'off'  %}
       {% set n = states.binary_sensor |selectattr('state', 'eq', 'on')|selectattr('attributes.device_class', 'eq', 'window')|list|count %}
-      {% set x = states.binary_sensor |selectattr('state', 'eq', 'on')|selectattr('attributes.device_class', 'eq', 'window')|map(attribute='name')|join(', ') %}
+      {% set x = states.binary_sensor |selectattr('state', 'eq', 'on')|selectattr('attributes.device_class', 'eq', 'window')|join(', ', attribute='name') %}
       {% if n == 1 %}
         c'è un infisso aperto in casa: {{x}}
       {% elif  n > 1 %}

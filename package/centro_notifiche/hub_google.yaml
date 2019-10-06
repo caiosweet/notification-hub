@@ -24,7 +24,7 @@ homeassistant:
     package.node_anchors:
       customize: &customize
         package: 'Centro Notifiche'
-        version: 'Google 0.9'
+        version: 'Google 1.0'
         author: 'Caio - www.hassiohelp.eu'
 
       expose: &expose
@@ -239,6 +239,7 @@ automation:
             {% endif %}
             {% set ns.vol = (states('input_number.default_restore_volume') | int / 100) if ns.vol == 0 else ns.vol %}
             {{ ns.vol }}
+
       - service_template: > # GOOGLE TTS/Assistant
           {% if is_state('input_boolean.tts_google_mode', 'on') %}
             script.tts_google_assistant_mode
@@ -247,7 +248,7 @@ automation:
           {% endif %}
         data_template:
           message: >
-            {{ trigger.payload_json.message }}
+            {{ trigger.payload_json.message_tts if trigger.payload_json.message_tts else trigger.payload_json.message }}
 
       - service: media_player.volume_set
         data_template:

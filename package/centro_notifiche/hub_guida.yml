@@ -31,12 +31,13 @@
       # notify: 0             [Mettendo 0, non verrà inviata la notifica di testo]
       # location:             "home" oppure "not_home" [Per inviare i messaggi di testo solo se si è in casa o fuori casa.]
       # link:                 http://tuolink [Invia un link solo nei messaggi testo]
-      # url:                  *disabilitato [Per l'ivio di immagini tramite telegram o servizi che utilizzano lo stesso metodo con url e caption]
-      # file:                 [Per l'ivio di immagini tramite telegram o servizi che utilizzano lo stesso metodo con file e caption]
-      # caption:              [Per il testo all'interno dell'immagine]
+      # url:                  [Per l'ivio di immagini tramite telegram o servizi che utilizzano lo stesso metodo con url ]
+      # file:                 [Per l'ivio di immagini tramite telegram o servizi che utilizzano lo stesso metodo con file]
+      # caption:              [Per il testo all'interno dell'immagine - Se omesso, vengono utilizzati Title e Message]
       # title:                'Notifiche Hassio' [Usato per aggiungere un titolo alla notifica/messaggio, ad esclusione del TTS]
       # message:              "messaggio personale da aggiungere" [Il proprio messaggio che verrà inserito, fra le varie macro, annuncio, salut, spegni... se chiamate!]
-      # volume: 0.4           [numero da 0 a 1 es. 0.50 per il 50% del volume]
+      # message_tts:          messaggio solo per la funzione TTS [Se il campo resta vuoto o non viene utilizzato, verrà considerato il contenuto di "message"]
+      # volume:               [numero da 0 a 1 es. 0.50 per il 50% del volume]
       # mute: 1               [Il messaggio audio non verà riprodotto dal media_player]
       # no_show: 1            [Il messaggio non verrà inserito nelle notifiche persistenti di Hass]
       # alexa_type:           [Il tipo di servizio che userà Alexa (tts, announce, push)]
@@ -48,16 +49,15 @@
       # benvenuto:            [Si può eliminare se  volete. Variabile usata dall'esterno dello script (tipo message:) Chiamata da parte di un'automazione ]
 
 
-
 ## Se si utilizza un template ricordarsi di usare data_template
     # data_template:
     #   person:  >-
     #     {{ trigger.to_state.attributes.friendly_name }}
 ######################################################################################################
 
-#Esempio invio foto
+#Esempio invio foto con URL o FILE (se CAPTION è definito verranno utilizzati TITLE e MESSAGE)
 # script:
-#   my_notify_telegram_foto_url_file:
+#   my_notify_telegram_foto_file_file:
 #     alias: 'Invio foto www test'
 #     sequence:
 #       - service: script.my_notify
@@ -71,4 +71,14 @@
 #           message: 'Test per invio foto da www'
 #           file: "/config/extra/www.png"
 #           caption: "da hassio"
-
+#-----------------------------------------------------------------------------------------------------
+#   my_notify_telegram_foto_url_file:
+#     alias: 'Invio foto www test'
+#     sequence:
+#       - service: script.my_notify
+#         data_template:
+#           title: 'Invio foto da url'
+#           message: 'Test per invio foto da url'
+#           url: >-
+#               {{trigger.to_state.attributes.image_url}}
+#           notify: telegram

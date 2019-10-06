@@ -25,7 +25,7 @@ homeassistant:
     package.node_anchors:
       customize: &customize
         package: 'Centro Notifiche'
-        version: 'Alexa 0.9'
+        version: 'Alexa 1.0'
         author: 'Caio - www.hassiohelp.eu'
 
       expose: &expose
@@ -385,7 +385,7 @@ automation:
           target: >
             {{ states('device_tracker.player_alexa') }}
           message: >
-            {{ trigger.payload_json.message }}
+            {{ trigger.payload_json.message_tts if trigger.payload_json.message_tts else trigger.payload_json.message }}
           data:
             type: >
               {% if trigger.payload_json.alexa_type | length == 0 %}

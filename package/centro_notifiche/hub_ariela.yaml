@@ -1,0 +1,218 @@
+#### Card Lovelace minimal
+  # type: entities
+  # title: Ariela
+  # show_header_toggle: false
+  # entities:
+  #   - type: section
+  #     label: ''
+  #   - entity: input_boolean.ariela_switch
+  #   - entity: input_boolean.ariela_push
+  #   - entity: automation.mqtt_notifications_tts_ariela
+  #   - entity: automation.mqtt_notifications_push_ariela
+  #############################################################################
+
+#######################################-#######################################
+##                                 CUSTOMIZE                                   
+#######################################-#######################################
+homeassistant:
+  customize:
+    ################################################
+    ## NODE ANCHORS
+    ################################################
+    package.node_anchors:
+      customize: &customize
+        package: 'Centro Notifiche'
+        version: 'Ariela 0.9'
+        author: 'Caio - www.hassiohelp.eu'
+
+      expose: &expose
+        <<: *customize
+        haaska_hidden: false
+        homebridge_hidden: false
+
+    ################################################
+    ## Automation
+    ################################################
+    automation.mqtt_notifications_tts_ariela:
+      <<: *customize
+      icon: mdi:alpha-a-circle-outline
+    automation.mqtt_notifications_push_ariela:
+      <<: *customize
+      icon: mdi:alpha-a-circle-outline
+    ################################################
+    ## input Boolean
+    ################################################
+    input_boolean.ariela_switch:
+      <<: *customize
+    input_boolean.ariela_push:
+      <<: *customize
+
+######################################-#######################################
+##                                   GROUP
+######################################-#######################################
+# group:
+#   hub_ariela_config:
+#     name: Impostazioni Ariela
+#       - input_boolean.ariela_switch
+#       - input_boolean.ariela_push
+#       - automation.mqtt_notifications_tts_ariela
+#       - automation.mqtt_notifications_push_ariela
+
+#######################################-#######################################
+##                                   INPUT
+#######################################-#######################################
+
+input_boolean:
+  ariela_switch:
+    name: Ariela
+    icon: mdi:android-studio
+
+  ariela_push:
+    name: Ariela Push
+    icon: mdi:cellphone-text
+
+# input_select:
+#   #----------------------------------------------------------------------------------------------------#
+#   # Inserire i propri dispositivi ALEXA con il proprio friandly_name                                   #
+#   #----------------------------------------------------------------------------------------------------#
+#   notification_android_tts:
+#     name: Android TTS
+#     icon: mdi:speaker-wireless
+#     options: !secret notification_media_player_alexa_hub
+
+
+#######################################-#######################################
+##                                 AUTOMATION
+#######################################-#######################################
+automation:
+  #----------------------------------------------------------------------------------------------------#
+  # PUSH #
+  #----------------------------------------------------------------------------------------------------#
+  - id: mqtt_notifications_push_ariela_hub
+    alias: MQTT Notifications PUSH Ariela
+    initial_state: true
+    trigger:
+      - platform: mqtt
+        topic: "hub/setting"
+    condition:
+      - condition: and
+        conditions:
+          - condition: template
+            value_template: >
+              {{ is_state('input_boolean.ariela_push', 'on') }}
+          - condition: template
+          #   value_template: >
+          #     {{ is_state('input_boolean.ariela_switch', 'on') }}
+          # - condition: template
+            value_template: >-
+              {{ trigger.payload != '' }}
+      # - condition: or
+      #   conditions:
+      #     - condition: template
+      #       value_template: >
+      #         {{ trigger.payload_json.alexa_type == 'push' }}
+      #     - condition: template
+      #       value_template: >
+      #         {{ trigger.payload_json.alexa_push == '1' }}
+      #     - condition: template
+      #       value_template: >
+      #         {{ states('input_select.default_alexa_type') | lower == 'push' }}
+    action:
+      - service: notify.android
+        data_template:
+          title: >- 
+            {{ trigger.payload_json.title }}
+          message: >-
+            {{ trigger.payload_json.message }}
+          data:
+            actions: # action and title
+              - action: "{{ ariela_action_1 }}"
+                title: "{{ ariela_action_title_1 }}"
+              - action: "{{ ariela_action_2 }}"
+                title: "{{ ariela_action_title_2}}"
+              - action: "{{ ariela_action_3 }}"
+                title: "{{ ariela_action_title_3 }}"
+
+            color: "{{ ariela_color }}" #Colore icona blu di default  # "#00ff00" #verde "#FF0000" #rosso #
+            dismiss: "{{ ariela_dismiss }}" # true or false (funziona insieme a tag)
+            force_image: "{{ force_image }}" # boolean, default false. Put this to true to force images to be downloaded
+            icon: "{{ ariela_icon }}" #A URL of an icon to use for the notification
+            image: "{{ ariela_image }}" # A URL of an image to send
+            message_type: "{{ ariela_message_type }}" # notification or data
+            stream_source: "{{ ariela_stream_source }}" # A camera entity id (eg: camera.ffmpeg) or http / https video file url to stream. 
+            tag: "{{ ariela_tag }}" # id integer
+            url: "{{ url }}" # An URL that you want to be opened with the implicit browser when clicking the notification
+            
+            
+# title
+# message
+# data:
+#   actions
+#   color
+#   dismiss
+#   force_image
+#   icon
+#   image
+#   message_type
+#   stream_source
+#   tag
+#   url
+
+  #----------------------------------------------------------------------------------------------------#
+  # ARIELA TTS - ANDROID #
+  #----------------------------------------------------------------------------------------------------#
+  - id: mqtt_notifications_tts_ariela_hub
+    alias: MQTT Notifications TTS Ariela
+    initial_state: true
+    trigger:
+      - platform: mqtt
+        topic: "hub/setting"
+    condition:
+      - condition: template
+        value_template: >-
+          {{ trigger.payload != '' }}
+      - condition: template
+        value_template: >
+          {{ trigger.payload_json.mute | length == 0 }}
+      - condition: template
+        value_template: >
+          {{ is_state('input_boolean.ariela_switch', 'on') }}
+      # - condition: template
+      #   value_template: >
+      #     {{ trigger.payload_json.alexa_type != 'push' }}
+      # - condition: template
+      #   value_template: >
+      #     {{ states('input_select.default_alexa_type') | lower != 'push' }}
+      - condition: and
+        conditions:
+          - condition: or
+            conditions:
+              - condition: template
+                value_template: >
+                  {{ is_state('binary_sensor.dnd', 'off') }}
+              - condition: state
+                entity_id: input_boolean.priority_message
+                state: 'on'
+          - condition: state
+            entity_id: input_boolean.speech_notifications
+            state: 'on'
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: group.location_tracker
+                state: 'home'
+              - condition: state
+                entity_id: input_boolean.guest_mode
+                state: 'on'
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: homeassistant/tts/android_oneplus_5t_tts/tts
+          payload: >-
+             {{ trigger.payload_json.message }}
+
+#######################################-#######################################
+##                                  SCRIPT
+#######################################-#######################################
+# script:
+
