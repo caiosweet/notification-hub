@@ -35,10 +35,10 @@ homeassistant:
     ################################################
     ## Device Tracker
     ################################################
-    device_tracker.player_google:
-      <<: *customize
-      friendly_name: Tracker Player Google
-      icon: mdi:animation-play
+    # device_tracker.player_google:
+    #   <<: *customize
+    #   friendly_name: Tracker Player Google
+    #   icon: mdi:animation-play
     ################################################
     ## input Boolean
     ################################################
@@ -58,6 +58,12 @@ homeassistant:
       <<: *customize
     input_select.language:
       <<: *customize
+
+    input_text.player_google:
+      <<: *customize
+      friendly_name: Tracker Player Google
+      icon: mdi:animation-play
+
     ################################################
     ## Sensor
     ################################################
@@ -127,13 +133,16 @@ input_select:
       - De
       - Nl
 
+input_text:
+  player_google:
+    name: Tracker Player Google
 #######################################-#######################################
 ##                               DEVICE TRACKER
 #######################################-#######################################
-device_tracker:
-  - platform: mqtt
-    devices:
-      player_google: 'hub/google'
+# device_tracker:
+#   - platform: mqtt
+#     devices:
+#       player_google: 'hub/google'
 
 #######################################-#######################################
 ##                                   TIMER
@@ -161,7 +170,7 @@ automation:
       - service: media_player.volume_set
         data_template:
           entity_id: >
-            {{ states('device_tracker.player_google') }}
+            {{ states('input_text.player_google') }}
           volume_level: >
             {{ states('input_number.google_volume_storage') | float | round(2) }}
 
@@ -204,9 +213,22 @@ automation:
                 entity_id: input_boolean.guest_mode
                 state: 'on'
     action:
-      - service: mqtt.publish
+      # - service: mqtt.publish
+      #   data_template:
+      #     payload: >-
+      #       {% if trigger.payload_json.media_player_google | length == 0 and states('sensor.media_player_google') | length == 0 %}
+      #          all
+      #       {% elif trigger.payload_json.media_player_google | length > 2 %}
+      #         {{ trigger.payload_json.media_player_google }}
+      #       {% else %}
+      #         {{ states('sensor.media_player_google') }}
+      #       {% endif %}
+      #     topic: hub/google
+      #     retain: true
+      - service: input_text.set_value
         data_template:
-          payload: >-
+          entity_id: input_text.player_google
+          value: >-
             {% if trigger.payload_json.media_player_google | length == 0 and states('sensor.media_player_google') | length == 0 %}
                all
             {% elif trigger.payload_json.media_player_google | length > 2 %}
@@ -214,8 +236,7 @@ automation:
             {% else %}
               {{ states('sensor.media_player_google') }}
             {% endif %}
-          topic: hub/google
-          retain: true
+
       - service: input_boolean.turn_off
         data:
           entity_id:
@@ -229,13 +250,13 @@ automation:
             {% set ns = namespace(vol=0) %}
             {% if is_state('timer.volume', 'active') %}
               {% set ns.vol = states('input_number.google_volume_storage') | float | round(2) %}
-            {% elif states('device_tracker.player_google').split(',')|count > 1 %}
-            {% for x in states('device_tracker.player_google').split(',') %}
+            {% elif states('input_text.player_google').split(',')|count > 1 %}
+            {% for x in states('input_text.player_google').split(',') %}
               {% set val = state_attr('media_player.' + x.split('.')[1], 'volume_level') | float | round(2) %}
               {% set ns.vol = val if val > ns.vol else ns.vol %}
             {% endfor %}
             {% else %}
-              {% set ns.vol = state_attr(states('device_tracker.player_google'), 'volume_level') | float | round(2) %}
+              {% set ns.vol = state_attr(states('input_text.player_google'), 'volume_level') | float | round(2) %}
             {% endif %}
             {% set ns.vol = (states('input_number.default_restore_volume') | int / 100) if ns.vol == 0 else ns.vol %}
             {{ ns.vol }}
@@ -253,7 +274,7 @@ automation:
       - service: media_player.volume_set
         data_template:
           entity_id: >
-            {{ states('device_tracker.player_google') }}
+            {{ states('input_text.player_google') }}
           volume_level: >
             {% if trigger.payload_json.volume | length == 0 %}
               {{ states('sensor.period_of_day_volume') }}
@@ -282,7 +303,7 @@ script:
           language: >
             {{ states('input_select.language') | lower }}
           entity_id: >
-            {{ states('device_tracker.player_google') }}
+            {{ states('input_text.player_google') }}
           message: >-
             {{ message }}
   #----------------------------------------------------------------------------------------------------#
