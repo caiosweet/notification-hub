@@ -16,9 +16,16 @@ homeassistant:
         <<: *customize
         haaska_hidden: false
         homebridge_hidden: false
-    ################################################
-    ## input
-    ################################################
+
+  ## Automation
+    automation.google_volume_restore_hub:
+      <<: *customize
+      friendly_name: 'Ripristino Volume Google'
+    automation.event_notifications_tts_google_hub:
+      <<: *customize
+      friendly_name: 'Evento notifica TTS Google'
+
+  ## input
     input_boolean.tts_google_mode:
       <<: *customize
     input_boolean.google_switch:
@@ -33,35 +40,20 @@ homeassistant:
       <<: *customize
       friendly_name: Tracker Player Google
       icon: mdi:animation-play
-    ################################################
-    ## Sensor
-    ################################################
+
+  ## Sensor
     sensor.media_player_google:
       <<: *customize
-    ################################################
-    ## Script
-    ################################################
+
+  ## Script
     script.tts_google_translate_say_mode:
       <<: *customize
     script.tts_google_assistant_mode:
       <<: *customize
-    ################################################
-    ## Timer
-    ################################################
+
+  ## Timer
     timer.volume_google:
       <<: *customize
-#######################################-#######################################
-##                                   GROUP
-#######################################-#######################################
-group:
-  hub_google_config:
-    name: Impostazioni Google
-    entities:
-     - input_boolean.google_switch
-     - input_boolean.tts_google_mode
-     - input_select.language
-     - input_select.notification_media_player_google
-     - input_number.google_volume_storage
 
 #######################################-#######################################
 ##                                   INPUT
@@ -82,7 +74,6 @@ input_number:
     min: 0
     max: 1
     step: 0.1
-    #initial: 0.2
 
 input_select:
   #----------------------------------------------------------------------------------------------------#
@@ -118,6 +109,9 @@ timer:
 ##                                 AUTOMATION
 #######################################-#######################################
 automation:
+#1-----------------------------------------------------------------------------------------------------#
+  # VOLUME RESTORE
+  #----------------------------------------------------------------------------------------------------#
   - id: google_volume_restore_hub
     alias: Google Volume Restore
     initial_state: true
@@ -135,9 +129,11 @@ automation:
             {{ states('input_text.player_google') }}
           volume_level: >
             {{ states('input_number.google_volume_storage') | float | round(2) }}
-
-  - id: mqtt_notifications_tts_google_hub
-    alias: MQTT Notifications tts Google
+#2-----------------------------------------------------------------------------------------------------#
+  # EVENTO TTS
+  #----------------------------------------------------------------------------------------------------#
+  - id: event_notifications_tts_google_hub
+    alias: event_notifications_tts_google_hub
     initial_state: true
     trigger:
       - platform: event
@@ -237,8 +233,8 @@ automation:
 ##                                  SCRIPT
 #######################################-#######################################
 script:
-  #----------------------------------------------------------------------------------------------------#
-  # Da Automazione MQTT Notifications tts Google - TTS Google Translate - #
+#1-----------------------------------------------------------------------------------------------------#
+  # Da automation.event_notifications_tts_google_hub - TTS Google Translate
   #----------------------------------------------------------------------------------------------------#
   tts_google_translate_say_mode:
     alias: Modo TTS Google Translate Say
@@ -251,8 +247,8 @@ script:
             {{ states('input_text.player_google') }}
           message: >-
             {{ message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}
-  #----------------------------------------------------------------------------------------------------#
-  # Da Automazione MQTT Notifications tts Google - Google Assistant Web Server - #
+#2-----------------------------------------------------------------------------------------------------#
+  # Da event_notifications_tts_google_hub - Google Assistant Web Server
   # Addons Usato in questa versione (64-bit AMD) lo trovi qui https://github.com/marcelveldt/hassio-addons-repo
   #----------------------------------------------------------------------------------------------------#
   tts_google_assistant_mode:
