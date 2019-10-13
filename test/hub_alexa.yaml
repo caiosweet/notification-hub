@@ -347,7 +347,8 @@ automation:
       - service: timer.start
         data_template:
           entity_id: timer.volume_alexa
-          duration: "00:00:{{states('input_text.last_message') | wordcount // 2+2 }}"
+          duration: >-
+            {{(trigger.event.data.message_tts if trigger.event.data.message_tts else trigger.event.data.message) | wordcount // 2+2}}
 
 #######################################-#######################################
 ##                                  SCRIPT

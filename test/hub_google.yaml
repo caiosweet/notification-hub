@@ -227,7 +227,11 @@ automation:
       - service: timer.start
         data_template:
           entity_id: timer.volume_google
-          duration: "00:00:{{states('input_text.last_message') | wordcount // 2+3 }}"
+          duration: >-
+            {{(trigger.event.data.message_tts if trigger.event.data.message_tts else trigger.event.data.message) | wordcount // 2+3}}
+
+      - wait_template: "{{ is_state('timer.volume_google', 'idle') }}"
+      #- wait_template: "{{not is_state('timer.volume_google', 'active')}}"
 
 #######################################-#######################################
 ##                                  SCRIPT
