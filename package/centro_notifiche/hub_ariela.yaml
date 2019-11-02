@@ -72,7 +72,7 @@ automation:
           title: >- 
             {{ trigger.event.data.title }}
           message: >-
-            {{ trigger.event.data.message }}
+            {{ trigger.event.data.message  |replace('\n','')|replace('   ',' ')| replace('  ',' ') }}
 
           # ----- DA IMPLEMENTARE -----#
           
@@ -136,7 +136,7 @@ automation:
         data_template:
           topic: !secret ariela_tts
           payload: >-
-             {{ trigger.event.data.message }}
+             {{ trigger.event.data.message |replace('\n','')|replace('   ',' ')| replace('  ',' ')}}
 
 #----- SCHEMA -----#
 # title
