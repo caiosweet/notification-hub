@@ -1,18 +1,3 @@
-#### Card Lovelace minimal
-  # type: entities
-  # title: Google
-  # show_header_toggle: false
-  # entities:
-  #   - type: section
-  #     label: ''
-  #   - entity: input_boolean.google_switch
-  #   - entity: input_boolean.tts_google_mode
-  #   - entity: input_select.language
-  #   - entity: input_select.notification_media_player_google
-  # #  - entity: input_number.google_volume_storage ## Salva il volume precedente se possibile
-  # #  - automation.google_volume_restore ## Attiva/Disattiva il salvataggio del volume precedente
-  #############################################################################
-
 #######################################-#######################################
 ##                                 CUSTOMIZE                                   
 #######################################-#######################################
@@ -24,7 +9,7 @@ homeassistant:
     package.node_anchors:
       customize: &customize
         package: 'Centro Notifiche'
-        version: 'Google 1.0'
+        version: 'Google 1.2'
         author: 'Caio - www.hassiohelp.eu'
 
       expose: &expose
@@ -32,67 +17,43 @@ homeassistant:
         haaska_hidden: false
         homebridge_hidden: false
 
-    ################################################
-    ## Device Tracker
-    ################################################
-    # device_tracker.player_google:
-    #   <<: *customize
-    #   friendly_name: Tracker Player Google
-    #   icon: mdi:animation-play
-    ################################################
-    ## input Boolean
-    ################################################
+  ## Automation
+    automation.google_volume_restore_hub:
+      <<: *customize
+      friendly_name: 'Ripristino Volume Google'
+    automation.event_notifications_tts_google_hub:
+      <<: *customize
+      friendly_name: 'Evento notifica TTS Google'
+
+  ## input
     input_boolean.tts_google_mode:
       <<: *customize
     input_boolean.google_switch:
       <<: *customize
-    ################################################
-    ## input Number
-    ################################################
     input_number.google_volume_storage:
       <<: *customize
-    ################################################
-    ## input Select
-    ################################################
     input_select.notification_media_player_google:
       <<: *customize
     input_select.language:
       <<: *customize
-
     input_text.player_google:
       <<: *customize
       friendly_name: Tracker Player Google
       icon: mdi:animation-play
 
-    ################################################
-    ## Sensor
-    ################################################
+  ## Sensor
     sensor.media_player_google:
       <<: *customize
-    ################################################
-    ## Script
-    ################################################
+
+  ## Script
     script.tts_google_translate_say_mode:
       <<: *customize
     script.tts_google_assistant_mode:
       <<: *customize
-    ################################################
-    ## Timer
-    ################################################
+
+  ## Timer
     timer.volume_google:
       <<: *customize
-#######################################-#######################################
-##                                   GROUP
-#######################################-#######################################
-group:
-  hub_google_config:
-    name: Impostazioni Google
-    entities:
-     - input_boolean.google_switch
-     - input_boolean.tts_google_mode
-     - input_select.language
-     - input_select.notification_media_player_google
-     - input_number.google_volume_storage
 
 #######################################-#######################################
 ##                                   INPUT
@@ -113,7 +74,6 @@ input_number:
     min: 0
     max: 1
     step: 0.1
-    #initial: 0.2
 
 input_select:
   #----------------------------------------------------------------------------------------------------#
@@ -136,13 +96,6 @@ input_select:
 input_text:
   player_google:
     name: Tracker Player Google
-#######################################-#######################################
-##                               DEVICE TRACKER
-#######################################-#######################################
-# device_tracker:
-#   - platform: mqtt
-#     devices:
-#       player_google: 'hub/google'
 
 #######################################-#######################################
 ##                                   TIMER
@@ -156,6 +109,9 @@ timer:
 ##                                 AUTOMATION
 #######################################-#######################################
 automation:
+#1-----------------------------------------------------------------------------------------------------#
+  # VOLUME RESTORE
+  #----------------------------------------------------------------------------------------------------#
   - id: google_volume_restore_hub
     alias: Google Volume Restore
     initial_state: true
@@ -173,21 +129,21 @@ automation:
             {{ states('input_text.player_google') }}
           volume_level: >
             {{ states('input_number.google_volume_storage') | float | round(2) }}
-
-
-  - id: mqtt_notifications_tts_google_hub
-    alias: MQTT Notifications tts Google
+      # - service: timer.cancel
+      #   entity_id: timer.volume_google
+#2-----------------------------------------------------------------------------------------------------#
+  # EVENTO TTS
+  #----------------------------------------------------------------------------------------------------#
+  - id: event_notifications_tts_google_hub
+    alias: event_notifications_tts_google_hub
     initial_state: true
     trigger:
-      - platform: mqtt
-        topic: "hub/setting"
+      - platform: event
+        event_type: hub
     condition:
       - condition: template
-        value_template: >-
-          {{ trigger.payload != '' }}
-      - condition: template
         value_template: >
-          {{ trigger.payload_json.mute | length == 0 }}
+          {{ trigger.event.data.mute | length == 0 }}
       - condition: template
         value_template: >
           {{ is_state('input_boolean.google_switch', 'on') }}
@@ -213,26 +169,14 @@ automation:
                 entity_id: input_boolean.guest_mode
                 state: 'on'
     action:
-      # - service: mqtt.publish
-      #   data_template:
-      #     payload: >-
-      #       {% if trigger.payload_json.media_player_google | length == 0 and states('sensor.media_player_google') | length == 0 %}
-      #          all
-      #       {% elif trigger.payload_json.media_player_google | length > 2 %}
-      #         {{ trigger.payload_json.media_player_google }}
-      #       {% else %}
-      #         {{ states('sensor.media_player_google') }}
-      #       {% endif %}
-      #     topic: hub/google
-      #     retain: true
       - service: input_text.set_value
         data_template:
           entity_id: input_text.player_google
           value: >-
-            {% if trigger.payload_json.media_player_google | length == 0 and states('sensor.media_player_google') | length == 0 %}
+            {% if trigger.event.data.media_player_google | length == 0 and states('sensor.media_player_google') | length == 0 %}
                all
-            {% elif trigger.payload_json.media_player_google | length > 2 %}
-              {{ trigger.payload_json.media_player_google }}
+            {% elif trigger.event.data.media_player_google | length > 2 %}
+              {{ trigger.event.data.media_player_google }}
             {% else %}
               {{ states('sensor.media_player_google') }}
             {% endif %}
@@ -269,31 +213,34 @@ automation:
           {% endif %}
         data_template:
           message: >
-            {{ trigger.payload_json.message_tts if trigger.payload_json.message_tts else trigger.payload_json.message }}
+            {{ trigger.event.data.message_tts if trigger.event.data.message_tts else trigger.event.data.message }}
 
       - service: media_player.volume_set
         data_template:
           entity_id: >
             {{ states('input_text.player_google') }}
           volume_level: >
-            {% if trigger.payload_json.volume | length == 0 %}
+            {% if trigger.event.data.volume | length == 0 %}
               {{ states('sensor.period_of_day_volume') }}
             {% else %}
-              {{ trigger.payload_json.volume }}
+              {{ trigger.event.data.volume }}
             {% endif %}
-
 
       - service: timer.start
         data_template:
           entity_id: timer.volume_google
-          duration: "00:00:{{states('sensor.last_message') | wordcount // 2+3 }}"
+          duration: >-
+            {{((trigger.event.data.message_tts if trigger.event.data.message_tts else trigger.event.data.message) | wordcount // 2+3)}}
+
+      # - wait_template: >-
+      #     {{ not is_state(states('input_text.player_google'), 'playing') }}
 
 #######################################-#######################################
 ##                                  SCRIPT
 #######################################-#######################################
 script:
-  #----------------------------------------------------------------------------------------------------#
-  # Da Automazione MQTT Notifications tts Google - TTS Google Translate - #
+#1-----------------------------------------------------------------------------------------------------#
+  # Da automation.event_notifications_tts_google_hub - TTS Google Translate
   #----------------------------------------------------------------------------------------------------#
   tts_google_translate_say_mode:
     alias: Modo TTS Google Translate Say
@@ -305,9 +252,11 @@ script:
           entity_id: >
             {{ states('input_text.player_google') }}
           message: >-
-            {{ message }}
-  #----------------------------------------------------------------------------------------------------#
-  # Da Automazione MQTT Notifications tts Google - Google Assistant Web Server - #
+            {{ message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}
+          
+
+#2-----------------------------------------------------------------------------------------------------#
+  # Da event_notifications_tts_google_hub - Google Assistant Web Server
   # Addons Usato in questa versione (64-bit AMD) lo trovi qui https://github.com/marcelveldt/hassio-addons-repo
   #----------------------------------------------------------------------------------------------------#
   tts_google_assistant_mode:
@@ -316,7 +265,7 @@ script:
       - service: notify.google_assistant
         data_template:
           message: >-
-            {{ message }}
+            {{ message | replace('\n','') | replace('   ',' ') | replace('  ',' ') }}
 
 #######################################-#######################################
 ##                                  SENSOR

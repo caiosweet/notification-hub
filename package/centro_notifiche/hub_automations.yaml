@@ -1,22 +1,9 @@
-# switch:
-# - platform: command_line
-#   switches:
-#     switch_name:
-#       command_off: >
-#         curl -H "Content-Type: application/json" -X POST -d '{"notifications_enabled":true}' http://192.168.1.81:8008/setup/assistant/notifications
-#       command_on: >
-#         curl -H "Content-Type: application/json" -X POST -d '{"notifications_enabled":false}' http://192.168.1.81:8008/setup/assistant/notifications
-#       command_state: >
-#         curl -X POST http://192.168.1.81:8008/setup/assistant/notifications
-
-
-
   #----------------------------------------------------------------------------------------------------#
-  # ESEMPI DI COME CREARE DELLE AUTOMAZIONI CON I RICHIAMI ALLE MACRO #
+  # ESEMPI DI COME CREARE DELLE AUTOMAZIONI CON I RICHIAMI ALLE MACRO
   #----------------------------------------------------------------------------------------------------#
 automation:
   #----------------------------------------------------------------------------------------------------#
-  # Hassio Start #
+  # Hassio Start
   #----------------------------------------------------------------------------------------------------#
   - id: notifica_di_avvio_hub
     alias: Notifica di avvio
@@ -33,16 +20,16 @@ automation:
         alexa_type: "tts"
 
   #----------------------------------------------------------------------------------------------------#
-  # Hassio Shtudown #
+  # Hassio Shtudown
   #----------------------------------------------------------------------------------------------------#
   - id: Shut Down HUB
     alias: Shut Down
     initial_state: true
     trigger:
-      - platform: homeassistant
-        event: shutdown
-      - event_type: homeassistant.restart
-        platform: event
+      # - platform: homeassistant
+      #   event: shutdown
+      # - event_type: homeassistant.restart
+      #   platform: event
 
       # Inserito evento sul restart per avere il tempo di avviare le notifiche
       - platform: event
@@ -63,7 +50,7 @@ automation:
           volume: 0.3
 
   #----------------------------------------------------------------------------------------------------#
-  # Accesso Fallito #
+  # Accesso Fallito
   #----------------------------------------------------------------------------------------------------#
   - id: accesso_fallito_hub
     alias: "Accesso fallito"
@@ -93,7 +80,7 @@ automation:
           #   http://www.ip-tracker.org/locator/ip-lookup.php?ip={{ states.persistent_notification.http_login.attributes.message.split ('from ') [1] }}
 
   #----------------------------------------------------------------------------------------------------#
-  # Nuova versione di Hassi.io #
+  # Nuova versione di Hassi.io
   #----------------------------------------------------------------------------------------------------#
   - alias: Update notifications
     initial_state: true
@@ -108,54 +95,54 @@ automation:
           file: https://raw.githubusercontent.com/home-assistant/home-assistant-assets/master/logo-round-192x192.png
 
   #----------------------------------------------------------------------------------------------------#
-  # Benvenuto # Esempio Macro di Benvenuto elaborata al di fuori del buil_message   {{ benvenuto }}  
+  # Benvenuto # Esempio Macro di Benvenuto elaborata al di fuori del buil_message   {{ benvenuto }}
   #----------------------------------------------------------------------------------------------------#
-  - id: Benvenuto HUB
-    alias: Benvenuto
-    initial_state: true
-    trigger:
-      - platform: state
-        entity_id: !secret location_tracker_hub
-          # - person.nome
-        from: 'not_home'
-        to: 'home'
-        for: '00:02:00'
-    action:
-      - service: script.my_notify
-        data_template:
-          call_no_annuncio: 1
-          alexa_type: "announce"
-          alexa_method: "speak"
-          title: Benvenuto
-          benvenuto: >
-            {% set person = trigger.entity_id.split('.')[1]|replace('_', ' ') %}
-            {%- macro benvenuto(person) -%}
-            {{ [
-            "Bentornato a casa " ~person~" ",
-            "Indovina chi è a casa? è " ~person~" ",
-            person + " è ora in casa. ",
-            "Benvenuto a casa " ~person~". Ci sei mancato. ",
-            "La nostra casa è ora completa, riposati e rilassati!. Bentornato " ~person~" ",
-            "La vita è come una canzone, sei di nuovo al posto tuo. Benvenuto a casa " ~person~" ",
-            "Ehilà!. " ~person~ " Benvenuto a casa!. ",
-            "Toc toc. Chi c'è qui? è " ~person~" ",
-            person~ "!. Tu sei a casa!.",
-            "Conosco un segreto!. " ~person~ " è a casa!. ",
-            "Sto percependo un disturbo nella forza.. " ~person~ " deve essere a casa!. ",
-            "E la casa diventa una casa. Bentornato. " ~person~" ",
-            person~ " è qui ora. Benvenuto a casa. ",
-            person~ " è ora qui. ",
-            "Solo un piccolo annuncio. " ~person~ " è arrivato!. ",
-            "Perdonate l'interruzione, ma " ~person~ " è a casa!. ",
-            "I miei sistemi stanno rilevando la presenza di ulteriori umani. " ~person~ " è stato identificato come: in casa. "
-            "Bentornato "~person~"!. La casa si sta attivando!. ",
-            "Benvenuto a casa "~person~"!. È bello rivederti!. Lasciami accendere la casa. ",
-            "Beh, sembra che "~person~" sia finalmente a casa!. Preparerò la casa per te. ",
-            "È bello vedere che sei tornato sano e salvo "~person~"!. Lasciami aprire la porta e preparare la casa. ",
-            "Fantastico, "~person~" è tornato!. Permettimi di preparare la casa per te. "
-            ] | random }}
-            {%- endmacro -%}
-            {{ benvenuto(person) }}
+  # - id: Benvenuto HUB
+  #   alias: Benvenuto
+  #   initial_state: true
+  #   trigger:
+  #     - platform: state
+  #       entity_id: !secret location_tracker_hub
+  #         # - person.nome
+  #       from: 'not_home'
+  #       to: 'home'
+  #       for: '00:02:00'
+  #   action:
+  #     - service: script.my_notify
+  #       data_template:
+  #         call_no_annuncio: 1
+  #         alexa_type: "announce"
+  #         alexa_method: "speak"
+  #         title: Benvenuto
+  #         benvenuto: >
+  #           {% set person = trigger.entity_id.split('.')[1]|replace('_', ' ') %}
+  #           {%- macro benvenuto(person) -%}
+  #           {{ [
+  #           "Bentornato a casa " ~person~" ",
+  #           "Indovina chi è a casa? è " ~person~" ",
+  #           person + " è ora in casa. ",
+  #           "Benvenuto a casa " ~person~". Ci sei mancato. ",
+  #           "La nostra casa è ora completa, riposati e rilassati!. Bentornato " ~person~" ",
+  #           "La vita è come una canzone, sei di nuovo al posto tuo. Benvenuto a casa " ~person~" ",
+  #           "Ehilà!. " ~person~ " Benvenuto a casa!. ",
+  #           "Toc toc. Chi c'è qui? è " ~person~" ",
+  #           person~ "!. Tu sei a casa!.",
+  #           "Conosco un segreto!. " ~person~ " è a casa!. ",
+  #           "Sto percependo un disturbo nella forza.. " ~person~ " deve essere a casa!. ",
+  #           "E la casa diventa una casa. Bentornato. " ~person~" ",
+  #           person~ " è qui ora. Benvenuto a casa. ",
+  #           person~ " è ora qui. ",
+  #           "Solo un piccolo annuncio. " ~person~ " è arrivato!. ",
+  #           "Perdonate l'interruzione, ma " ~person~ " è a casa!. ",
+  #           "I miei sistemi stanno rilevando la presenza di ulteriori umani. " ~person~ " è stato identificato come: in casa. "
+  #           "Bentornato "~person~"!. La casa si sta attivando!. ",
+  #           "Benvenuto a casa "~person~"!. È bello rivederti!. Lasciami accendere la casa. ",
+  #           "Beh, sembra che "~person~" sia finalmente a casa!. Preparerò la casa per te. ",
+  #           "È bello vedere che sei tornato sano e salvo "~person~"!. Lasciami aprire la porta e preparare la casa. ",
+  #           "Fantastico, "~person~" è tornato!. Permettimi di preparare la casa per te. "
+  #           ] | random }}
+  #           {%- endmacro -%}
+  #           {{ benvenuto(person) }}
 
   #----------------------------------------------------------------------------------------------------#
   # Bentronato # Esempio Call di Bentornato [ if call_bentornato == 1 Macro {{ bentornato(person) }} ]
@@ -225,7 +212,7 @@ automation:
             {{ trigger.to_state.attributes.friendly_name }}
 
   #----------------------------------------------------------------------------------------------------#
-  # Nuovo Dispositivo Connesso #
+  # Nuovo Dispositivo Connesso
   #----------------------------------------------------------------------------------------------------#
   - id: Nuovo Dispositivo Connesso HUB
     alias: Nuovo Dispositivo Connesso
@@ -258,7 +245,7 @@ automation:
             {% endif %}
 
   #----------------------------------------------------------------------------------------------------#
-  # Avvio Computer #
+  # Avvio Computer
   #----------------------------------------------------------------------------------------------------#
   - id: computer_on_hub
     alias: "Computer ON"

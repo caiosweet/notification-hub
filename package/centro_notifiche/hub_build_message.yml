@@ -1,4 +1,4 @@
->
+>-
   {# ** NON RIMUOVERE IL SIMBOLO " > " QUI SOPRA * #}
   {# ********************************************* #}
   {#             MACRO E IMPOSTAZIONI              #}
@@ -326,3 +326,4 @@
   {% if call_fatto_casuale == 1 or is_state ('input_boolean.random_fact', 'on') and is_state ('binary_sensor.random_binary_sensor' , 'on') and call_no_fatto_casuale != 1 %}
   {{ info() }} {{ fatto_casuale() }}
   {% endif %}
+
