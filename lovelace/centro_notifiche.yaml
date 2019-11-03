@@ -14,6 +14,7 @@ cards:
         action:
           service: input_boolean.turn_on
 
+
   # CARD 99 Gruppo Automazioni
   - type: entities
     title: Automazioni
@@ -44,6 +45,11 @@ cards:
           - input_number.night_volume
           - input_number.default_restore_volume
       - entity: binary_sensor.dnd
+        tap_action:
+          action: call-service
+          service: input_boolean.toggle
+          service_data:
+            entity_id: input_boolean.dnd
       - type: call-service
         icon: mdi:power
         name: Ultimo Messaggio
@@ -56,6 +62,7 @@ cards:
           type: section
           label: Modalità
         entities:
+          - entity: input_boolean.dnd
           - entity: input_boolean.last_message
           - entity: input_boolean.guest_mode
           - entity: input_boolean.priority_message
@@ -137,3 +144,38 @@ cards:
       - entity: input_boolean.ariela_push
       - entity: automation.event_notifications_push_ariela_hub
       - entity: automation.event_notifications_tts_ariela_hub
+
+  # CARD TEST
+  - type: entities
+    title: Test
+    show_header_toggle: false
+    entities:
+      - entity: input_boolean.disattiva_centro
+        name: disattiva centro notifiche
+      - entity: script.centro_notifiche_test
+        name: Test coda 1
+        secondary_info: last-changed
+      - entity: script.centro_notifiche_test2
+        name: Test coda 2
+        secondary_info: last-changed
+      - entity: script.my_notify_telegram_foto_url_file
+        secondary_info: last-changed
+      - entity: input_text.player_alexa
+        secondary_info: last-changed
+      - entity: sensor.media_player_alexa
+        secondary_info: last-changed
+      - entity: sensor.last_alexa
+        secondary_info: last-changed
+      - entity: input_number.alexa_volume_storage
+        secondary_info: last-changed
+      - type: divider
+      - entity: input_text.player_google
+        secondary_info: last-changed
+      - entity: sensor.media_player_google
+        secondary_info: last-changed
+      - entity: input_number.google_volume_storage
+        secondary_info: last-changed
+      - entity: sensor.period_of_day
+        secondary_info: last-changed
+      - entity: sensor.period_of_day_volume
+        secondary_info: last-changed
