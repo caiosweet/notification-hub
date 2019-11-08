@@ -49,7 +49,7 @@ cards:
           action: call-service
           service: input_boolean.toggle
           service_data:
-            entity_id: input_boolean.dnd
+            entity_id: input_boolean.speech_notifications
       - type: call-service
         icon: mdi:power
         name: Ultimo Messaggio
@@ -62,7 +62,6 @@ cards:
           type: section
           label: Modalità
         entities:
-          - entity: input_boolean.dnd
           - entity: input_boolean.last_message
           - entity: input_boolean.guest_mode
           - entity: input_boolean.priority_message
