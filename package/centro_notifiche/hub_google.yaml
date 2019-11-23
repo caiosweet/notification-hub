@@ -187,6 +187,11 @@ automation:
             - input_boolean.last_message
             - input_boolean.priority_message
 
+      - service: media_player.turn_on
+        data_template:
+          entity_id: >
+            {{ states('input_text.player_google') }}
+
       - service: input_number.set_value
         data_template:
           entity_id: input_number.google_volume_storage
