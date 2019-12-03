@@ -5,3 +5,7 @@
 
 # notification-hub 
 Notification center - Hassio [link](https://github.com/caiosweet/notification-hub/releases/latest)
+
+# Update
+New Version.
+You can find the new version with appDaemon here [![GitHub release (latest by date)](https://img.shields.io/github/v/release/caiosweet/Package-Notification-HUB-AppDaemon)](https://github.com/caiosweet/Package-Notification-HUB-AppDaemon/releases)
